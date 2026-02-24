@@ -1,22 +1,23 @@
 # Protein-energy-minimization-gromacs-workflow
 Energy minimization workflow of a ligand-free protein using GROMACS for molecular docking and MD preparation.
-
-🧬 Protein Energy Minimization in GROMACS
 📌 Overview
 
-This repository contains a complete workflow for performing energy minimization of a ligand-free protein using GROMACS.
+This repository contains a complete and simplified workflow for performing energy minimization of a ligand-free protein using GROMACS.
 
-Energy minimization is the first essential step before:
+The commands shown here are intentionally synthetized and standardized for clarity and reproducibility.
+For simplicity, the only required input file is named:
+protein.pdb
+This unified naming convention allows easier replication of the workflow without modifying multiple file names.
+
+The minimized structure can be used for:
 
 Molecular docking
 
-Molecular dynamics (MD) simulations
+Molecular dynamics simulations
 
-Structural refinement
+Structural visualization
 
-Binding pocket analysis
-
-The goal is to remove steric clashes and optimize atomic geometry before further computational analysis.
+Further computational refinement
 
 🛠 Software Requirements
 
@@ -26,145 +27,122 @@ Linux / Ubuntu / WSL
 
 Basic terminal knowledge
 
-Nano or any text editor
-
-Check your GROMACS installation:
+Check your installation:
 
 gmx --version
-📂 Workflow Steps (Explained)
+📂 Workflow Steps
 1️⃣ Generate Topology
 gmx pdb2gmx -f protein.pdb -o protein.gro -water tip3p
-🔎 What this does:
+🔎 What this command does
 
-pdb2gmx converts a PDB file into a GROMACS-compatible structure.
+Converts protein.pdb into GROMACS format.
 
--f protein.pdb → input protein structure.
+Generates topology file (topol.top).
 
--o protein.gro → output coordinate file.
+Adds hydrogens.
 
--water tip3p → defines the water model.
+Assigns a force field.
 
-🧠 Why it matters:
+Defines water model (TIP3P).
 
-This step:
+🧠 Why this step is important
 
-Assigns a force field
+This prepares the protein structure for molecular simulations.
 
-Adds hydrogens
-
-Generates the topology file (topol.top)
-
-Prepares the system for simulation
-
-2️⃣ Define Simulation Box
+2️⃣ Define the Simulation Box
 gmx editconf -f protein.gro -o protein_box.gro -c -d 1.0 -bt cubic
-🔎 What this does:
+🔎 What this command does
 
-editconf defines the simulation box.
+Centers the protein in the box (-c).
 
--c → centers the protein.
+Adds 1.0 nm distance from the protein to box edges (-d 1.0).
 
--d 1.0 → sets 1.0 nm distance from protein to box edge.
+Creates a cubic box (-bt cubic).
 
--bt cubic → creates a cubic box.
+🧠 Why this step is important
 
-🧠 Why it matters:
-
-Prevents protein atoms from interacting with their own periodic images.
+Prevents artificial interactions due to periodic boundary conditions.
 
 3️⃣ Solvate the System
 gmx solvate -cp protein_box.gro -cs spc216.gro -o protein_solv.gro -p topol.top
-🔎 What this does:
+🔎 What this command does
 
-solvate fills the box with water molecules.
+Fills the simulation box with water molecules.
 
--cp → protein box structure.
+Updates topology file with solvent information.
 
--cs → water configuration file.
+🧠 Why this step is important
 
--p → updates topology file.
-
-🧠 Why it matters:
-
-Biological systems function in aqueous environments.
+Proteins function in aqueous environments; simulations must reflect this.
 
 4️⃣ Create Energy Minimization Parameters
 
-Create file: mdp/minim.mdp
+Create a file named:
 
-integrator = steep
-emtol = 1000.0
-emstep = 0.01
-nsteps = 50000
+minim.mdp
+
+With the following content:
+
+integrator  = steep
+emtol       = 1000.0
+emstep      = 0.01
+nsteps      = 50000
 cutoff-scheme = Verlet
-nstlist = 1
-ns_type = grid
+nstlist     = 1
+ns_type     = grid
 coulombtype = PME
-rcoulomb = 1.0
-rvdw = 1.0
-pbc = xyz
-🔎 Parameter explanation:
+rcoulomb    = 1.0
+rvdw        = 1.0
+pbc         = xyz
+🔎 Parameter meaning
 
-integrator = steep → Steepest descent algorithm.
+steep → Steepest descent minimization
 
-emtol = 1000.0 → Convergence threshold (kJ/mol/nm).
+emtol → Convergence threshold
 
-emstep = 0.01 → Step size.
+nsteps → Maximum number of steps
 
-nsteps = 50000 → Maximum steps.
+PME → Accurate electrostatics calculation
 
-PME → Particle Mesh Ewald (electrostatics).
+pbc → Periodic boundary conditions
 
-pbc = xyz → Periodic boundary conditions.
+5️⃣ Neutralize the System (Add Ions)
 
-🧠 Why it matters:
-
-Controls how energy minimization is performed.
-
-5️⃣ Add Ions (Neutralization)
-
-Prepare binary input:
+Preprocess:
 
 gmx grompp -f minim.mdp -c protein_solv.gro -p topol.top -o ions.tpr -maxwarn 1
-🔎 What this does:
 
-grompp preprocesses input files.
-
-Generates .tpr file (portable binary run input).
-
-Now neutralize:
+Add ions:
 
 gmx genion -s ions.tpr -o protein_ions.gro -p topol.top -pname NA -nname CL -neutral
-🔎 What this does:
 
-Replaces water molecules with ions.
+When prompted, select:
 
--neutral → neutralizes system charge.
+SOL
+🔎 What this step does
 
-Select group SOL when prompted.
+Neutralizes total system charge.
 
-🧠 Why it matters:
+Replaces water molecules with Na⁺ or Cl⁻ ions.
 
-Simulations require neutral systems for proper electrostatics.
+🧠 Why it matters
+
+Electrostatic stability requires a neutral simulation box.
 
 6️⃣ Run Energy Minimization
 
-Prepare run:
+Prepare binary:
 
 gmx grompp -f minim.mdp -c protein_ions.gro -p topol.top -o em.tpr
 
 Run minimization:
 
 gmx mdrun -v -deffnm em
-🔎 What this does:
+🔎 What this does
 
-mdrun executes simulation.
+Executes steepest descent minimization.
 
--deffnm em → sets default output names.
-
--v → verbose mode.
-
-🧠 Expected output:
+Produces output files:
 
 em.gro
 
@@ -172,51 +150,43 @@ em.edr
 
 em.log
 
-7️⃣ Extract Minimized Structure
+7️⃣ Extract the Minimized Structure
 gmx trjconv -s em.tpr -f em.gro -o protein_min.pdb
 
-Select group: Protein
+Select:
 
-🔎 What this does:
-
-Converts final minimized structure to .pdb format.
-
-📌 Final Structure:
-
+Protein
+📌 Output
 protein_min.pdb
 
-Ready for:
+This structure is ready for:
 
-Docking
+Docking studies
 
-MD
+Molecular dynamics
 
-Visualization
+Structural visualization
 
 📊 Extract Potential Energy
 gmx energy -f em.edr -o potential.xvg
 
-Select: Potential
+Select:
 
-Convert to CSV
+Potential
+Convert to CSV (Optional)
 grep -v '^[@#]' potential.xvg | tr -s ' ' ',' > potential.csv
-🔎 What this does:
 
-Removes header lines.
+This removes headers and converts the file into a comma-separated format for Excel or plotting software.
 
-Converts spaces to commas.
+📈 Expected Energy Profile
 
-Makes file Excel-compatible.
+A successful minimization should show:
 
-📈 Expected Energy Curve
+Rapid decrease in potential energy (steric clash correction)
 
-A successful minimization shows:
+Energy plateau indicating structural stabilization
 
-Rapid energy decrease → steric clash correction
-
-Energy plateau → structural stabilization
-
-📌 Output Files
+📌 Final Output Files
 
 protein_min.pdb
 
@@ -226,15 +196,13 @@ potential.csv
 
 em.log
 
-em.edr
-
 📜 License
 
 MIT License
 
-🔬 Citation
+🔬 Citation Metadata
 
-Create file CITATION.cff
+Create a file named CITATION.cff:
 
 cff-version: 1.2.0
 title: Protein Energy Minimization using GROMACS
@@ -242,29 +210,16 @@ authors:
   - family-names: Castañeda
     given-names: Luis Ernesto
 date-released: 2026
+🧠 Notes on Simplification
 
-This allows GitHub to display citation metadata automatically.
+The commands in this repository are presented in a synthetized format to improve clarity and reproducibility.
 
-🚀 Optional Improvements
+To avoid confusion, the workflow assumes:
 
-Add PNG energy plot
+A single input file named protein.pdb
 
-Add example PDB dataset
+Standard water model (TIP3P)
 
-Add workflow diagram
+Default ion naming (NA / CL)
 
-Add Zenodo DOI
-
-Add GROMACS version badge
-
-🎯 Project Type
-
-This repository can be oriented as:
-
-📚 Academic project
-
-🧠 Bioinformatics portfolio
-
-🧪 Reproducible computational workflow
-
-📄 Supplementary material for publication
+This makes the protocol easier to replicate and ideal for teaching, reproducible workflows, and portfolio presentation
