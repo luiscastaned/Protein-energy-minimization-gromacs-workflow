@@ -35,3 +35,11 @@ Check installation:
 
 ```bash
 gmx --version
+# 🚀 Step-by-Step Workflow
+
+---
+
+## 🔹 Step 1 — Generate Topology
+
+```bash
+gmx pdb2gmx -f protein.pdb -o protein.gro -water tip3p
