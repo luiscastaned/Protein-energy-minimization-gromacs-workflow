@@ -229,20 +229,21 @@ MIT License
 
 ---
 
-# 🔬 Citation
+# 👨‍🔬 Author
 
-Create `CITATION.cff`:
-
-```yaml
-cff-version: 1.2.0
-title: Protein Energy Minimization using GROMACS
-authors:
-  - family-names: Castañeda
-    given-names: Luis Ernesto
-date-released: 2026
-```
+Luis Ernesto Castañeda Mota  
+Department of Biochemistry  
+CINVESTAV-IPN  
 
 ---
+
+# 📚 How to Cite This Workflow
+
+If you use this protocol in academic work, please cite:
+
+Castañeda Mota, L.E.  
+*Protein Energy Minimization Workflow using GROMACS.*  
+GitHub Repository (2026).
 
 # 🧠 Notes
 
