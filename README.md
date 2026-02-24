@@ -12,8 +12,7 @@ This repository provides a **step-by-step workflow** for performing
 
 To simplify reproducibility, the protocol assumes a single input file named:
 
-*protein.pdb*
-
+**protein.pdb**
 
 All commands are presented in a **standardized and synthetized format** to make the workflow easier to follow, reproduce, and teach.
 
