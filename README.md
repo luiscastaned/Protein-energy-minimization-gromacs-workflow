@@ -241,7 +241,7 @@ CINVESTAV-IPN
 
 If you use this protocol in academic work, please cite:
 
-Castañeda Mota, L.E.  
+Castañeda-Mota, L.E.  
 *Protein Energy Minimization Workflow using GROMACS.*  
 GitHub Repository (2026).
 
