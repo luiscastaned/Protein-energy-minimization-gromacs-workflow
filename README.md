@@ -84,7 +84,7 @@ Proteins require aqueous environments for realistic simulations.
 Create a file named:
 
 ```
-minim.mdp
+nano minim.mdp
 ```
 
 With the following content:
